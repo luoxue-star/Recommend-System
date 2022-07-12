@@ -38,10 +38,12 @@ if __name__ == "__main__":
     for user, sim_users in top_n_users.items():
         rs_result = set()
         for sim_user in sim_users:
+            # 将和自身相似度高的用户没购买的物品去掉
             sim_user_row = df.loc[sim_user]
             sim_user_row[sim_user_row == 0] = np.nan
             rs_result = rs_result.union(set(sim_user_row.dropna().index))
 
+        # 将自身购买过的物品去掉
         user_row = df.loc[user]
         user_row[user_row == 0] = np.nan
         rs_result -= set(user_row.dropna().index)
@@ -62,14 +64,16 @@ if __name__ == "__main__":
 
     rs_results = dict()
     for user in df.index:
+        # 遍历每一个用户，并且将用户没购买过的先去掉
         rs_result = set()
         items = df.loc[user]
         items[items == 0] = np.nan
         items = items.dropna().index
+        # 在用户购买过的物品中，找出相似度最大的物品
         for item in items:
             rs_result = rs_result.union(top_n_items[item])
 
-        # 过滤掉重复的
+        # 过滤掉用户购买过的物品
         rs_result -= set(items)
         rs_results[user] = rs_result
 
